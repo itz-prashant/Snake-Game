@@ -9,32 +9,75 @@ document.addEventListener('DOMContentLoaded', function(){
     let snake = [{x: 160, y: 200}, {x: 140, y: 200}, {x: 120, y: 200}];
 
 
-    function drawDiv(x, y, className){
-        const divElement = document.createElement('div')
-        divElement.classList.add(className)
-        divElement.style.top = `${y}px`
-        divElement.style.left = `${x}px`
+    let dx = cellSize;
+    let dy = 0
 
-        return divElement
+    function updateSnake() {
+        const newHead = { x: snake[0].x + dx, y: snake[0].y + dy };
+        snake.unshift(newHead); // Add new head to the snake
+
+        // check collision with food
+        if(newHead.x === food.x && newHead.y === food.y) {
+            score += 10;
+        } else {
+            snake.pop(); // Remove tail
+        }
+    }
+
+    function changeDirection(e){
+       
+        const isGoingDown = dy == cellSize;
+        const isGoingUp = dy == -cellSize;
+        const isGoingLeft = dx == -cellSize;
+        const isGoingRight = dx == cellSize;
+
+        if(e.key == 'ArrowUp' && !isGoingDown){
+            dx = 0;
+            dy = -cellSize;
+        }else if(e.key == 'ArrowDown' && !isGoingUp){
+            dx = 0;
+            dy = cellSize;
+        }else if(e.key == 'ArrowLeft' && !isGoingRight){
+            dx = -cellSize;
+            dy = 0;
+        }else if(e.key == 'ArrowRight' && !isGoingLeft){
+            dx = cellSize;
+            dy = 0;
+        }
+    }
+
+    function drawDiv(x, y, className){
+        const divElement = document.createElement('div');
+        divElement.classList.add(className);
+        divElement.style.top = `${y}px`;
+        divElement.style.left = `${x}px`;
+        return divElement;
     }
 
     function drawFoodAndSnake(){
-        gameArena.innerHTML == '';
+        gameArena.innerHTML = '';
 
         snake.forEach((snakeCell) => {
-            const snakeElement = drawDiv(snakeCell.x, snakeCell.y, 'snake')
-            gameArena.appendChild(snakeElement)
+            const snakeElement = drawDiv(snakeCell.x, snakeCell.y, 'snake');
+            gameArena.appendChild(snakeElement);
         })
 
         const foodElement = drawDiv(food.x, food.y, 'food')
         gameArena.appendChild(foodElement)
     }
 
+    function gameLoop() {
+        setInterval(() => {
+            updateSnake()
+            drawFoodAndSnake()
+        }, 200)
+    }
+
     function runGame(){
         if(!gameStarted){
             gameStarted = true;
-            drawFoodAndSnake()
-            // gameLoop();
+            document.addEventListener('keydown', changeDirection)
+            gameLoop();
         }
     }
 
